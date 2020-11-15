@@ -76,7 +76,7 @@ void autonomous() {}
 void opcontrol() {
 	while(true){
 		//drive stuff
-		
+		setDriveMotors();
 		//intake stuff
 
 		//shooter stuff

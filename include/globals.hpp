@@ -8,7 +8,7 @@ extern pros::Motor intakeRight;
 extern pros::Motor driveLeftBack;
 extern pros::Motor driveLeftFront;
 extern pros::Motor driveRightBack;
-extern pros::Motor driveRightBack;
+extern pros::Motor driveRightFront;
 
 
 //CONTROLLER_MASTER
