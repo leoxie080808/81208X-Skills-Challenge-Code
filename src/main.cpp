@@ -1,4 +1,5 @@
 #include "main.h"
+#include "drive.hpp"
 
 /**
  * A callback function for LLEMU's center button.
@@ -24,9 +25,23 @@ void on_center_button() {
  */
 void initialize() {
 	pros::lcd::initialize();
-	pros::lcd::set_text(1, "Hello PROS User!");
+	pros::lcd::set_text(1, "81208X was here");
 
 	pros::lcd::register_btn1_cb(on_center_button);
+
+	driveLeftBack.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+	driveLeftFront.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+	driveRightBack.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+	driveRightFront.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+
+	shooter.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	indexer.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+
+	intakeLeft.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+	intakeRight.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+
+	pros::Imu Gyro (3);
+	pros::delay(1750);
 }
 
 /**
@@ -58,7 +73,17 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void autonomous() {
+	turnGyro(90, 127, 30, 1.0, 0, 0, 1, 1, 0);
+
+
+	//translate(200, 60);
+
+
+
+
+
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task

@@ -13,3 +13,6 @@ extern pros::Motor driveRightFront;
 
 //CONTROLLER_MASTER
 extern pros::Controller controller;
+
+
+extern pros::Imu Gyro;
