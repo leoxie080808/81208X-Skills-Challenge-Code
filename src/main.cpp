@@ -78,8 +78,9 @@ void opcontrol() {
 		//drive stuff
 		setDriveMotors();
 		//intake stuff
-
+		setIntakeMotors();
 		//shooter stuff
+		setRollerMotors();
 
 		pros::delay(10);
 
