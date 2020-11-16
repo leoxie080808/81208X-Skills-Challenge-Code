@@ -30,6 +30,14 @@ float goKi = 0;
 float setMinSpeed = 30;
 
 
+bool turnEndStop = true;
+
+//int turnTaskStartFlag = 0;
+float slowTurnAngle = 10;
+
+
+
+
 #define TURN_TASK_PERIOD			10	//10ms control period
 #define GO_STRAIGHT_PERIOD		    20   //20ms control period
 #define GYRO_RANGE 						7200
@@ -56,6 +64,10 @@ float setMinSpeed = 30;
 int dist2Encoder(int inch, int distPerTick){
     return inch/distPerTick;
 }
+
+
+
+double currentHeading = 0;
 
 /*
 0 - On spot turn
@@ -122,52 +134,84 @@ void translate(int units, int voltage){
   setDrive(0,0);
 }
 
-double turnGyroControlTask() {
-    double ctrlValue = 0;
-    double error = 0;
+double turnGyroControlTask()
+{
+  	float ctrlValue = 0;
+//  #ifdef INERTIAL_SENSOR
+    currentHeading = Gyro.get_heading();
+//  #else
+	// currentHeading =  myGyro.controllerGet();
+//  #endif
+  float error = targetAngle - currentHeading;
+	float slowRatio = 0;
+	if (fabs(error) > slowTurnAngle)
+	{
+		slowRatio = (turnMaxPower - turnMinPower) / (fabs(error) - slowTurnAngle);
+	}
+
 	while(turnTaskStartFlag == 1)
 	{
-		if (fabs(Gyro.get_heading() - targetAngle) < turnDeadZone)
+  //  #ifdef INERTIAL_SENSOR
+      currentHeading = Gyro.get_heading();
+  //  #else
+  	// currentHeading =  myGyro.controllerGet();
+  //  #endif
+		if (	fabs(currentHeading - targetAngle) < turnDeadZone)
 		{
-			setDrive(0,0);
+			// finish turn
+
+			if (turnEndStop){
+				setDrive(0,0);
+			}
 			turnTaskStartFlag = 0;
 		}
 		else{
-            error = targetAngle - Gyro.get_heading();
-            if (fabs(error) < 10)
-            {
-                ctrlValue = sgn(error) * turnMinPower;
+			error = targetAngle - currentHeading;
 
-            }
-            else
-            {
-                ctrlValue = turnKp * error;
-                //2 wheels turn here
-                ctrlValue = (fabs(ctrlValue) > turnMaxPower?sgn(ctrlValue) * turnMaxPower:ctrlValue);
-                ctrlValue = (fabs(ctrlValue) < turnMinPower? sgn(ctrlValue) * turnMinPower:ctrlValue);
-            }
-                if (turnWheelFlag == 0)
-                {
-                    // 2 wheel turns
-                    setDrive(ctrlValue,  -ctrlValue);
-                }
-                else if(turnWheelFlag == 1)
-                {
-                    // left wheel turns
-                    setDrive(ctrlValue, 0);
-                }
-                else if(turnWheelFlag == 2)
-                {
-                    // right wheel turns
-                    setDrive(0, -ctrlValue);
-                }
+			if (fabs(error) <= slowTurnAngle)
+			{
+				ctrlValue = sgn(error) * turnMinPower;
+
+
+			}
+			else
+			{
+        /*
+					ctrlValue = turnKp * error;
+					if (ctrlValue > turnMaxPower){
+						ctrlValue = turnMaxPower;
+					}
+					else{
+						ctrlValue = turnKp * error;
+					}*/
+				ctrlValue = sgn(error) * (turnMinPower + ( fabs(error) - slowTurnAngle) * slowRatio);
+			}
+
+			if (turnWheelFlag == 0)
+			{
+				// 2 wheel turns
+				setDrive(ctrlValue,  -ctrlValue);
+
+			}
+			else if(turnWheelFlag == 1)
+			{
+				// left wheel turns
+				setDrive(ctrlValue, 0);
+
+			}
+			else if(turnWheelFlag == 2)
+			{
+				// right wheel turns
+				setDrive(0, -ctrlValue);
+
+			}
+
 
 		}
-		pros::delay(10);
+
+    pros::delay(TURN_TASK_PERIOD);
 
 	}
-
-    return 0;
 }
 
 
@@ -175,9 +219,12 @@ double turnGyroControlTask() {
 
 
 
+
+
+
+
 void turnGyro(float setpoint, float maxPower, float minPower, float kp, float kd, float ki,
-					float deadZone, float momentum, int wheelFlag)
-{
+					float deadZone, float momentum, int wheelFlag, int timeOut){
 	int delayCnt = 0;
 	if (setpoint >= Gyro.get_heading()){
 		// turn right?
@@ -198,11 +245,20 @@ void turnGyro(float setpoint, float maxPower, float minPower, float kp, float kd
 	turnMomentum = momentum;
 	turnWheelFlag = wheelFlag;
 
-	turnTaskStartFlag = 1;
+  turnTaskStartFlag = 1;
   pros::Task turnTask(turnGyroControlTask, "turning task");
-//	pros::delay(10);
   while (turnTaskStartFlag ==1){
-    pros::delay(20);
-  }
+    delayCnt++;
+    if (delayCnt > timeOut / TURN_TASK_PERIOD)
+    {
 
+      turnTaskStartFlag = 0;
+      break;
+    }
+    pros::delay(10);
+  }
+//	pros::delay(10);
+  setDrive(0,0);
+  pros::delay(100);
+//  return 0;
 }
