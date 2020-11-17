@@ -20,3 +20,10 @@ void turnGyro(float setpoint, float maxPower, float minPower, float kp, float kd
 					float deadZone, float momentum,int wheelFlag, int timeout);
 
 double turnGyroControlTask();
+
+
+
+
+void driveStraight( float distance, float setAngle, float power, float kp, float timeout,int timeOut, float momentum ,bool endStop);
+
+void goStraightGyroControlTask();

@@ -8,3 +8,6 @@ void setRollers (int power);
 
 //driver control
 void setRollerMotors();
+
+
+void score();

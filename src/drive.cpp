@@ -262,3 +262,163 @@ void turnGyro(float setpoint, float maxPower, float minPower, float kp, float kd
   pros::delay(100);
 //  return 0;
 }
+
+
+
+
+
+//here is oging forward stuff
+#define ACC_MIN_SPEED			25
+#define GO_ACCEL_DIS			0.1
+#define GO_ACCEL_RATIO		((float)(MAX_MOVE_SPEED - ACC_MIN_SPEED) / GO_ACCEL_DIS)		// which means the max speed to stop min speed in 0.5m
+
+
+#define WHEEL_PERIMETER		0.319 	//4"
+#define CIRCLE_COUNT			360  // 900,300
+#define MAX_MOVE_SPEED		200
+#define MIN_MOVE_SPEED		 	10	// need test
+
+
+#define STOP_DISTANCE			0.15
+#define GO_SLOWDOWN_RATIO		((float)(MAX_MOVE_SPEED - MIN_MOVE_SPEED) / STOP_DISTANCE)		// which means the max speed to stop min speed in 0.5m 			//
+//#define GO_MOMENTUM				0.04
+#define SLOW_DRIVE_DIS		0.0			//10cm
+
+bool goEndStop = true;
+
+
+int startLeftEncoderF = 0;
+int startLeftEncoderR = 0;
+int startRightEncoderF = 0;
+int startRightEncoderR = 0;
+
+void goStraightGyroControlTask()
+{
+
+
+	double deltaLeft = 0;
+	double deltaRight = 0;
+
+	float driveDistance = 0;
+	float goSpeed = driveStraightSpeed;
+
+	float leftCmd = 0;
+	float rightCmd = 0;
+
+  float GO_SLOWDOWN_DIS = (float)(abs(driveStraightSpeed) - MIN_MOVE_SPEED) / GO_SLOWDOWN_RATIO;
+  float go_accel_dis = (float)(abs(driveStraightSpeed) - ACC_MIN_SPEED) / GO_ACCEL_RATIO;
+
+
+	float remainDis = 0 ;
+	float dynamicKp = goKp;
+	float ctrlValue = 0;
+  int curLeft = 0;
+  int curRight = 0;
+
+	while(goStraightStartFlag == 1){
+			remainDis = abs(driveSetDistance - driveDistance);
+			if(driveDistance > (driveSetDistance - GO_SLOWDOWN_DIS))
+			{
+
+			 if (remainDis <= SLOW_DRIVE_DIS)
+			 {
+			   goSpeed = sgn(goSpeed) * MIN_MOVE_SPEED;
+			 }
+			 else
+			 {
+
+			 		goSpeed = sgn(driveStraightSpeed) * MIN_MOVE_SPEED + sgn(driveStraightSpeed) * (remainDis - SLOW_DRIVE_DIS)  * GO_SLOWDOWN_RATIO;
+
+				 if (abs(goSpeed) < MIN_MOVE_SPEED)
+				 {
+				   		goSpeed = sgn(goSpeed) * MIN_MOVE_SPEED;
+				 }
+				}
+
+			}
+			else
+			{
+				if (driveDistance < GO_ACCEL_DIS){
+					goSpeed = sgn(driveStraightSpeed) *  ACC_MIN_SPEED + sgn(driveStraightSpeed) * driveDistance  * GO_ACCEL_RATIO;
+					if (abs(goSpeed) > abs(driveStraightSpeed)) goSpeed = driveStraightSpeed;
+					//writeDebugStreamLine("D = %f, v = %f", driveDistance, goSpeed);
+				}
+				else{
+
+					goSpeed = driveStraightSpeed;
+				}
+			}
+		dynamicKp = (0.5 + 0.5 * abs(goSpeed / MAX_MOVE_SPEED)) * goKp;
+  //  #ifdef INERTIAL_SENSOR
+    //  currentHeading = sys->get_heading();
+  //  #else
+  	 currentHeading =  Gyro.get_heading();
+  //  #endif
+		ctrlValue = dynamicKp * (goStraightAngle - currentHeading);
+
+		leftCmd = goSpeed + ctrlValue ;
+		rightCmd = goSpeed - ctrlValue ;
+
+
+		deltaLeft = (fabs( driveLeftFront.get_position()+driveLeftBack.get_position() - startLeftEncoderF - startLeftEncoderR)) / 2.0 ;
+		deltaRight = (fabs( driveRightFront.get_position()+driveRightBack.get_position() - startRightEncoderF - startRightEncoderR)) / 2.0;
+
+		driveDistance =  ((float)(deltaLeft + deltaRight) /2.0 ) * WHEEL_PERIMETER / CIRCLE_COUNT;
+
+
+		if(driveDistance < driveSetDistance){
+			//keep drive
+			setDrive(leftCmd, rightCmd);
+		}else{
+			//stop motor and the task
+			if (goEndStop){
+				setDrive(0,0);
+			}
+			goStraightStartFlag = 0;
+
+		}
+    pros::delay(GO_STRAIGHT_PERIOD);
+
+	}
+}
+
+
+void driveStraight( float distance, float setAngle, float power, float kp, float timeout,int timeOut, float momentum ,bool endStop){
+
+	driveSetDistance = distance;
+
+	if (distance >= momentum)
+		driveSetDistance = distance - momentum;			// 1m
+	else
+		driveSetDistance = distance;
+
+
+	driveStraightSpeed = power;		//power
+	startLeftEncoderF = driveLeftFront.get_position();
+  startLeftEncoderR = driveLeftBack.get_position();//leftRearMotor->getEncoder()->controllerGet();
+
+	startRightEncoderF = driveRightFront.get_position();//rightFwdMotor->getEncoder()->controllerGet();
+  startRightEncoderR = driveRightBack.get_position();//rightRearMotor->getEncoder()->controllerGet();
+	goStraightAngle = setAngle;
+	goStraightStartFlag = 1;
+	goKp = kp;
+	goEndStop = endStop;
+	int delayCnt = 0;
+
+  pros::Task go_straigt_task(goStraightGyroControlTask, "go straight task");
+
+  int time = timeOut * 1000 / GO_STRAIGHT_PERIOD;
+	while(goStraightStartFlag == 1){
+		delayCnt ++;
+		if (delayCnt > time){
+			setDrive(0,0);
+			goStraightStartFlag = 0;
+
+
+		}
+    pros::delay(GO_STRAIGHT_PERIOD);
+
+	}
+
+
+}

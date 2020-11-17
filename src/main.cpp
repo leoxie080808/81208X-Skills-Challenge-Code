@@ -80,7 +80,12 @@ void autonomous() {
 	translate(200, 100);
 
 turnGyro(90, 127, 30, 2.5, 0, 0.05, 0.5, 1, 0, 4000);
-	translate(200, 70);
+	//translate(200, 70);
+
+	driveStraight(0.87, 0, 80, 1.0, 2000, 2000, 0.1, true);
+
+score();
+	//void driveStraight( float distance, float setAngle, float power, float kp, float timeout,int timeOut, float momentum ,bool endStop);
 
 
 

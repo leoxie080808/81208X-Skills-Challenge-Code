@@ -15,3 +15,11 @@ void setRollerMotors(){
 
   setRollers(rollerPower);
 }
+
+
+
+void score(){
+  shooter.move_relative(800, 127);
+  indexer.move_relative(800, 127);
+  //setRollers(127);
+}
