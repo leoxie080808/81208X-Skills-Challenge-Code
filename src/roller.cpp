@@ -19,7 +19,7 @@ void setRollerMotors(){
 
 
 void score(){
-  shooter.move_relative(800, 127);
-  indexer.move_relative(800, 127);
+  shooter.move_relative(1200, 600);
+  indexer.move_relative(2100, 600);
   //setRollers(127);
 }
