@@ -11,3 +11,5 @@ void setRollerMotors();
 
 
 void score();
+
+void deploy();

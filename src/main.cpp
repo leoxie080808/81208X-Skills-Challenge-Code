@@ -74,18 +74,36 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-//	score();
+//score(); 1 is pretty much 3 foam tiles
 
 
+	deploy();
+	pros::delay(100);
 
-	translate(200, 100);
+//	driveStraight(0.2, 0, 80, 1.0, 2, 2, 0.1, true);
+//	pros::delay(2000);
 
-turnGyro(90, 127, 30, 2.5, 0, 0.05, 0.5, 1, 0, 4000);
+//	driveStraight(0.3, 0, 80, 1.0, 2, 2, 0.1, true);
+
+
+//pros::delay(100000);
+
+	//translate(200, 100);
+
+//turnGyro(90, 127, 30, 2.5, 0, 0.05, 0.5, 1, 0, 4000);
 	//translate(200, 70);
-
-	driveStraight(0.67, 90, 80, 1.0, 2000, 2000, 0.1, true);
-
-score();
+	setIntake(100);
+	driveStraight(0.33, 0, 80, 1.0, 1, 1, 0.1, true);
+	setIntake(0);
+	//resetDriveEncoder();
+	turnGyro(135, 127, 30, 2.5, 0, 0.05, 0.5, 1, 0, 4000);
+	//	resetDriveEncoder();
+	pros::delay(2500);
+	driveStraight(0.4, 135, 80, 1.0, 5, 5, 0.1, true);
+	score();
+	pros::delay(500);
+	driveStraight(-0.05, 135, 80, 1.0, 2, 2, 0.1, true);
+//score();
 	//void driveStraight( float distance, float setAngle, float power, float kp, float timeout,int timeOut, float momentum ,bool endStop);
 
 

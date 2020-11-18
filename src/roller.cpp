@@ -23,3 +23,10 @@ void score(){
   indexer.move_relative(2100, 600);
   //setRollers(127);
 }
+
+
+void deploy(){
+  shooter.move_relative(1200, 600);
+  //indexer.move_relative(2100, 600);
+  //setRollers(127);
+}

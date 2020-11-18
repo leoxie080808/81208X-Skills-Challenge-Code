@@ -22,7 +22,7 @@ void turnGyro(float setpoint, float maxPower, float minPower, float kp, float kd
 double turnGyroControlTask();
 
 
-
+double get_heading();
 
 void driveStraight( float distance, float setAngle, float power, float kp, float timeout,int timeOut, float momentum ,bool endStop);
 

@@ -67,6 +67,7 @@ int dist2Encoder(int inch, int distPerTick){
 
 
 
+
 double currentHeading = 0;
 
 /*
@@ -75,6 +76,21 @@ double currentHeading = 0;
 2 - right turn
 This will take the relative angle
 */
+
+
+
+
+
+double get_heading() {
+	double heading = Gyro.get_heading();
+	if (heading > 180)
+		return heading - 360;
+	else
+		return heading;
+}
+
+
+
 
 
 
@@ -138,7 +154,7 @@ double turnGyroControlTask()
 {
   	float ctrlValue = 0;
 //  #ifdef INERTIAL_SENSOR
-    currentHeading = Gyro.get_heading();
+    currentHeading = get_heading();//Gyro.get_heading();
 //  #else
 	// currentHeading =  myGyro.controllerGet();
 //  #endif
@@ -152,7 +168,7 @@ double turnGyroControlTask()
 	while(turnTaskStartFlag == 1)
 	{
   //  #ifdef INERTIAL_SENSOR
-      currentHeading = Gyro.get_heading();
+      currentHeading = get_heading();
   //  #else
   	// currentHeading =  myGyro.controllerGet();
   //  #endif
@@ -226,7 +242,7 @@ double turnGyroControlTask()
 void turnGyro(float setpoint, float maxPower, float minPower, float kp, float kd, float ki,
 					float deadZone, float momentum, int wheelFlag, int timeOut){
 	int delayCnt = 0;
-	if (setpoint >= Gyro.get_heading()){
+	if (setpoint >= get_heading()){
 		// turn right?
 		targetAngle = setpoint - momentum;
 
@@ -316,7 +332,7 @@ void goStraightGyroControlTask()
   int curRight = 0;
 
 	while(goStraightStartFlag == 1){
-			remainDis = abs(driveSetDistance - driveDistance);
+			remainDis = fabs(driveSetDistance - driveDistance);
 			if(driveDistance > (driveSetDistance - GO_SLOWDOWN_DIS))
 			{
 
@@ -329,7 +345,7 @@ void goStraightGyroControlTask()
 
 			 		goSpeed = sgn(driveStraightSpeed) * MIN_MOVE_SPEED + sgn(driveStraightSpeed) * (remainDis - SLOW_DRIVE_DIS)  * GO_SLOWDOWN_RATIO;
 
-				 if (abs(goSpeed) < MIN_MOVE_SPEED)
+				 if (fabs(goSpeed) < MIN_MOVE_SPEED)
 				 {
 				   		goSpeed = sgn(goSpeed) * MIN_MOVE_SPEED;
 				 }
@@ -340,7 +356,7 @@ void goStraightGyroControlTask()
 			{
 				if (driveDistance < GO_ACCEL_DIS){
 					goSpeed = sgn(driveStraightSpeed) *  ACC_MIN_SPEED + sgn(driveStraightSpeed) * driveDistance  * GO_ACCEL_RATIO;
-					if (abs(goSpeed) > abs(driveStraightSpeed)) goSpeed = driveStraightSpeed;
+					if (fabs(goSpeed) > abs(driveStraightSpeed)) goSpeed = driveStraightSpeed;
 					//writeDebugStreamLine("D = %f, v = %f", driveDistance, goSpeed);
 				}
 				else{
@@ -348,11 +364,11 @@ void goStraightGyroControlTask()
 					goSpeed = driveStraightSpeed;
 				}
 			}
-		dynamicKp = (0.5 + 0.5 * abs(goSpeed / MAX_MOVE_SPEED)) * goKp;
+		dynamicKp = (0.5 + 0.5 * fabs(goSpeed / MAX_MOVE_SPEED)) * goKp;
   //  #ifdef INERTIAL_SENSOR
     //  currentHeading = sys->get_heading();
   //  #else
-  	 currentHeading =  Gyro.get_heading();
+  	 currentHeading =  get_heading();//Gyro.get_heading();
   //  #endif
 		ctrlValue = dynamicKp * (goStraightAngle - currentHeading);
 
