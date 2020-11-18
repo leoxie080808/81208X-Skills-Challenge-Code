@@ -80,13 +80,15 @@ void autonomous() {
 	deploy();
 	pros::delay(100);
 
-//	driveStraight(0.2, 0, 80, 1.0, 2, 2, 0.1, true);
-//	pros::delay(2000);
+	driveStraight(0.2, 0, 80, 1.0, 2, 2, 0.1, true);
+	resetDriveEncoder();
 
-//	driveStraight(0.3, 0, 80, 1.0, 2, 2, 0.1, true);
+	pros::delay(2000);
+	driveStraight(0.3, 0, 80, 1.0, 2, 2, 0.1, true);
+	resetDriveEncoder();
 
 
-//pros::delay(100000);
+pros::delay(100000);
 
 	//translate(200, 100);
 
@@ -95,11 +97,13 @@ void autonomous() {
 	setIntake(100);
 	driveStraight(0.33, 0, 80, 1.0, 1, 1, 0.1, true);
 	setIntake(0);
-	//resetDriveEncoder();
+//	resetDriveEncoder();
+pros::delay(1000);
 	turnGyro(135, 127, 30, 2.5, 0, 0.05, 0.5, 1, 0, 4000);
-	//	resetDriveEncoder();
+		resetDriveEncoder();
 	pros::delay(2500);
-	driveStraight(0.4, 135, 80, 1.0, 5, 5, 0.1, true);
+
+	driveStraight(0.1, 135, 80, 1.0, 5, 5, 0.1, true);
 	score();
 	pros::delay(500);
 	driveStraight(-0.05, 135, 80, 1.0, 2, 2, 0.1, true);

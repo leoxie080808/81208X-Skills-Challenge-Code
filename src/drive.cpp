@@ -104,6 +104,14 @@ void setDrive(int left, int right){
 }
 
 
+void setDriving(int left, int right){
+  driveLeftBack.move_velocity(left);
+  driveLeftFront.move_velocity(left);
+  driveRightBack.move_velocity(right);
+  driveRightFront.move_velocity(right);
+}
+
+
 void resetDriveEncoder(){
   driveLeftBack.tare_position();
   driveLeftFront.tare_position();
@@ -147,7 +155,7 @@ void translate(int units, int voltage){
   setDrive(-10 * direction, -10*direction);
   pros::delay(50);
 
-  setDrive(0,0);
+  setDriving(0,0);
 }
 
 double turnGyroControlTask()
@@ -384,11 +392,11 @@ void goStraightGyroControlTask()
 
 		if(driveDistance < driveSetDistance){
 			//keep drive
-			setDrive(leftCmd, rightCmd);
+			setDriving(leftCmd, rightCmd);
 		}else{
 			//stop motor and the task
 			if (goEndStop){
-				setDrive(0,0);
+				setDriving(0,0);
 			}
 			goStraightStartFlag = 0;
 
@@ -409,6 +417,10 @@ void driveStraight( float distance, float setAngle, float power, float kp, float
 		driveSetDistance = distance;
 
 
+    driveLeftBack.tare_position();
+    driveLeftFront.tare_position();
+    driveRightBack.tare_position();
+    driveRightFront.tare_position();
 	driveStraightSpeed = power;		//power
 	startLeftEncoderF = driveLeftFront.get_position();
   startLeftEncoderR = driveLeftBack.get_position();//leftRearMotor->getEncoder()->controllerGet();
@@ -427,7 +439,7 @@ void driveStraight( float distance, float setAngle, float power, float kp, float
 	while(goStraightStartFlag == 1){
 		delayCnt ++;
 		if (delayCnt > time){
-			setDrive(0,0);
+			setDriving(0,0);
 			goStraightStartFlag = 0;
 
 
@@ -435,6 +447,6 @@ void driveStraight( float distance, float setAngle, float power, float kp, float
     pros::delay(GO_STRAIGHT_PERIOD);
 
 	}
-
+//driveSetDistance = 0;
 
 }
